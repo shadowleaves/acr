@@ -30,7 +30,7 @@ def run_iter(args):
             break
 
 
-def download_bars(path, file, exch, sym):
+def download_bars(path, file, exch, sym, reset=False):
     # tmp_file = '/tmp/bson.tmp'
 
     filepath = os.path.join(path, file)
@@ -40,15 +40,18 @@ def download_bars(path, file, exch, sym):
                             (exch, sym))
     bson_file = os.path.join(bson_path, '%s.bson.gz' % date)
 
-    print 'parsing %s ...' % bson_file
+    if os.path.exists(bson_file) and not reset:
+        return
+
+    print 'producing %s ...' % bson_file
     with gzip.open(bson_file, 'wb') as f_out:
 
-        args = 'dfview --json --symbol %s %s' % (sym, filepath)
+        args = 'dfview --json --threaded --symbol %s %s' % (sym, filepath)
         for line in run_iter(args):
             if not len(line):
                 continue
 
-            if 'error' in line:
+            if 'error' in line or line[0] != '{':
                 break
 
             try:
@@ -69,9 +72,8 @@ def download_bars(path, file, exch, sym):
 
 def main():
 
-    # file = '~/Dropbox/intraday/DOW_dates.csv'
-    # dates = pd.read_csv(file, index_col=1, header=None)
-    # dates = pd.DatetimeIndex(dates.index)
+    from multiprocessing import Pool
+    pool = Pool(processes=8)
 
     file = '~/Dropbox/intraday/DOW_univ.csv'
     df = pd.read_csv(file, index_col=0)
@@ -85,12 +87,19 @@ def main():
             path = os.path.join(root_path, exch, str(year), '%02d' % month)
             if not os.path.exists(path):
                 continue
-            for file in os.listdir(path):
+            for file in sorted(os.listdir(path)):
                 if '.bb.gz' in file:
                     # filepath = os.path.join(path, file)
+                    res = []
                     for sym in df.sym:
-                        download_bars(path, file, exch, sym=sym)
-                    # raise SystemExit
+                        args = (path, file, exch, sym)
+                        result = pool.apply_async(download_bars, args=args)
+                        res.append(result)
+
+                    # retriving results (process won't start to run until here)
+                    tmp = [x.get(timeout=1e6) for x in res]
+
+        # raise SystemExit
 
 
 if __name__ == '__main__':

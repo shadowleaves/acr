@@ -14,7 +14,7 @@ def main():
     # dates = pd.read_csv(file, index_col=1, header=None)
     # dates = pd.DatetimeIndex(dates.index)
 
-    path = '$HOME/Dropbox/intraday/bson/equities/AAPL/'
+    path = '$HOME/Dropbox/intraday/bson/bbl1_equities_all/AAPL/'
     path = os.path.expandvars(path)
 
     mapping = {'open_px': 'open',
