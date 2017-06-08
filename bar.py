@@ -36,11 +36,11 @@ def download_bars(path, file, exch, sym):
     filepath = os.path.join(path, file)
 
     date = file.split('.')[2]
-    bson_path = ensure_path('$HOME/Dropbox/intraday/bson/equities/%s' % sym)
+    bson_path = ensure_path('$HOME/Dropbox/intraday/bson/%s/%s' %
+                            (exch, sym))
     bson_file = os.path.join(bson_path, '%s.bson.gz' % date)
 
-    print bson_file
-
+    print 'parsing %s ...' % bson_file
     with gzip.open(bson_file, 'wb') as f_out:
 
         args = 'dfview --json --symbol %s %s' % (sym, filepath)
@@ -64,7 +64,7 @@ def download_bars(path, file, exch, sym):
                     date = datetime.utcfromtimestamp(dt[key])
                     date = date.replace(tzinfo=UTC)
                     dt[key] = date
-            f_out.write(bson.dumps(dt))
+            f_out.write(bson.BSON.encode(dt))
 
 
 def main():
@@ -73,7 +73,7 @@ def main():
     # dates = pd.read_csv(file, index_col=1, header=None)
     # dates = pd.DatetimeIndex(dates.index)
 
-    file = '~/Dropbox/intraday/R1K_univ.csv'
+    file = '~/Dropbox/intraday/DOW_univ.csv'
     df = pd.read_csv(file, index_col=0)
     df = df[~df.sym.isnull()]
 
@@ -88,7 +88,6 @@ def main():
             for file in os.listdir(path):
                 if '.bb.gz' in file:
                     # filepath = os.path.join(path, file)
-                    print file
                     for sym in df.sym:
                         download_bars(path, file, exch, sym=sym)
                     # raise SystemExit
