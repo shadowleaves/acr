@@ -10,6 +10,7 @@ def main():
     fn = 'oak_thistle_twap_trader_OAK_LIME1.ordertracker.OAK_LIME1-%s.1.bson'
     fn = fn % date_str
     filepath = os.path.join(path, fn)
+
     listen(filepath, start_count=5)
 
 

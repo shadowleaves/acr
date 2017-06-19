@@ -112,7 +112,7 @@ def main():
     root_path = '/nfs/data/hotel.inp/candlesticks/'
     # exch = 'shfe'
     exch = 'bbl1_equities_all'
-    for year in 2014, :
+    for year in 2017, :
         for month in xrange(13):
             path = os.path.join(root_path, exch, str(year), '%02d' % month)
             if not os.path.exists(path):
