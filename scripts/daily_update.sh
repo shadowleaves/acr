@@ -1,4 +1,7 @@
 #!/usr/bin/bash
 
-nohup unbuffer
+python $CODE/bar.py $@
+if [ $? != 0 ]; then exit; fi
 
+python $CODE/agg.py $@
+if [ $? != 0 ]; then exit; fi
